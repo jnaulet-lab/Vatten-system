@@ -1,0 +1,18 @@
+VATTEN - Licences
+
+Copyright (c) 2026 jnaulet-lab
+
+Ce dépôt combine plusieurs types de contenus, chacun sous sa licence.
+Les textes complets sont dans le dossier LICENSES/.
+
+- Firmware et intégration domotique (esphome/, homeassistant/)
+  Licence MIT                          -> LICENSES/MIT.txt
+
+- Modèles 3D et documentation (3d-models/, docs/)
+  Licence CC BY-SA 4.0                 -> LICENSES/CC-BY-SA-4.0.txt
+
+- Matériel : schémas, BOM, brochages (hardware/)
+  Licence CERN-OHL-P v2                -> LICENSES/CERN-OHL-P-2.0.txt
+
+Pour tout fichier non couvert explicitement, la licence du dossier
+parent s'applique.

@@ -1,0 +1,18 @@
+# ESPHome
+secrets.yaml
+.esphome/
+*.bin
+*.elf
+
+# Sauvegardes et temporaires
+*.bak
+*~
+*.tmp
+.DS_Store
+Thumbs.db
+
+# CAO
+*.FCBak
+*.FCStd1
+*.blend1
+*.blend2

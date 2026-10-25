@@ -1,0 +1,29 @@
+type: vertical-stack
+cards:
+  - type: gauge
+    name: Plante 1
+    entity: sensor.vatten_hub_plante_1_humidite_sol
+    min: 0
+    max: 100
+    needle: true
+    segments:
+      - from: 0
+        color: "#c0392b"
+      - from: 25
+        color: "#e0a030"
+      - from: 40
+        color: "#4a9d6b"
+  - type: entities
+    title: Réglages et commandes
+    entities:
+      - entity: switch.vatten_hub_plante_1_arrosage_auto
+      - entity: number.vatten_hub_plante_1_seuil_d_arrosage
+      - entity: number.vatten_hub_plante_1_duree_impulsion
+      - entity: number.vatten_hub_plante_1_lockout
+      - entity: button.vatten_hub_plante_1_arroser_maintenant
+      - entity: switch.vatten_hub_plante_1_pompe
+      - entity: sensor.vatten_hub_plante_1_tension_capteur
+  - type: history-graph
+    hours_to_show: 48
+    entities:
+      - entity: sensor.vatten_hub_plante_1_humidite_sol

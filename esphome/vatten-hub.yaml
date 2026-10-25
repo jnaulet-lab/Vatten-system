@@ -1,0 +1,30 @@
+# VATTEN - Vatten-Hub (ESP32)
+# Un bloc "plantN" par canal : capteur Vatten-Pebble + pompe + lockout.
+
+substitutions:
+  device_name: vatten-hub
+  friendly_name: "Vatten Hub"
+
+packages:
+  base: !include packages/base.yaml
+
+  plante1: !include
+    file: packages/plant_channel.yaml
+    vars:
+      ch: plante1
+      name: "Plante 1"
+      adc_pin: GPIO34      # ADC1 uniquement (32-39), ADC2 inutilisable avec le Wi-Fi
+      pump_pin: GPIO16     # sortie vers le MOSFET
+      dry_v: "2.80"        # tension capteur à sec (à calibrer)
+      wet_v: "1.20"        # tension capteur dans l'eau (à calibrer)
+
+  plante2:
+    !include
+    file: packages/plant_channel.yaml
+    vars:
+      ch: plante2
+      name: "Plante 2"
+      adc_pin: GPIO35
+      pump_pin: GPIO17
+      dry_v: "2.80"
+      wet_v: "1.20"

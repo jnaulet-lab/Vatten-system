@@ -1,0 +1,122 @@
+# Package par canal. Variables attendues : ch, name, adc_pin, pump_pin, dry_v, wet_v
+
+# --- Mesure : Vatten-Pebble (capteur capacitif v1.2) ---
+sensor:
+  - platform: adc
+    id: ${ch}_soil_voltage
+    name: "${name} - Tension capteur"
+    pin: ${adc_pin}
+    attenuation: 12db
+    update_interval: 10s
+    entity_category: diagnostic
+    unit_of_measurement: "V"
+    accuracy_decimals: 3
+    filters:
+      - median:
+          window_size: 7
+          send_every: 3
+    on_value:
+      then:
+        - lambda: |-
+            // Conversion tension -> % via calibration sec/humide
+            float pct = (x - ${dry_v}) / (${wet_v} - ${dry_v}) * 100.0;
+            id(${ch}_moisture).publish_state(clamp(pct, 0.0f, 100.0f));
+
+  - platform: template
+    id: ${ch}_moisture
+    name: "${name} - Humidité sol"
+    unit_of_measurement: "%"
+    device_class: moisture
+    state_class: measurement
+    accuracy_decimals: 0
+
+# --- Réglages ajustables depuis Home Assistant ---
+number:
+  - platform: template
+    id: ${ch}_threshold
+    name: "${name} - Seuil d'arrosage"
+    unit_of_measurement: "%"
+    min_value: 5
+    max_value: 80
+    step: 1
+    initial_value: 30
+    optimistic: true
+    restore_value: true
+    entity_category: config
+
+  - platform: template
+    id: ${ch}_pulse_s
+    name: "${name} - Durée impulsion"
+    unit_of_measurement: "s"
+    min_value: 5
+    max_value: 20          # plafond volontaire : 10 à 15 s recommandé
+    step: 1
+    initial_value: 12
+    optimistic: true
+    restore_value: true
+    entity_category: config
+
+  - platform: template
+    id: ${ch}_lockout_min
+    name: "${name} - Lockout"
+    unit_of_measurement: "min"
+    min_value: 30
+    max_value: 60
+    step: 5
+    initial_value: 45
+    optimistic: true
+    restore_value: true
+    entity_category: config
+
+# --- Pompe + arrosage automatique ---
+output:
+  - platform: gpio
+    id: ${ch}_pump_out
+    pin: ${pump_pin}
+
+switch:
+  - platform: output
+    id: ${ch}_pump
+    name: "${name} - Pompe"
+    output: ${ch}_pump_out
+    restore_mode: ALWAYS_OFF
+    # Sécurité matérielle : coupure forcée après 20 s quoi qu'il arrive
+    on_turn_on:
+      - delay: 20s
+      - switch.turn_off: ${ch}_pump
+
+  - platform: template
+    id: ${ch}_auto
+    name: "${name} - Arrosage auto"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+
+# Le script en mode "single" fait office de lockout :
+# tant qu'il tourne (impulsion + pause), tout nouveau déclenchement est ignoré.
+script:
+  - id: ${ch}_water
+    mode: single
+    then:
+      - logger.log: "${name} : impulsion d'arrosage"
+      - switch.turn_on: ${ch}_pump
+      - delay: !lambda 'return id(${ch}_pulse_s).state * 1000;'
+      - switch.turn_off: ${ch}_pump
+      # Pause pour laisser l'eau gagner le Vatten-Pebble par capillarité
+      - delay: !lambda 'return id(${ch}_lockout_min).state * 60000;'
+
+interval:
+  - interval: 60s
+    then:
+      - if:
+          condition:
+            and:
+              - switch.is_on: ${ch}_auto
+              - lambda: 'return id(${ch}_moisture).has_state() && id(${ch}_moisture).state < id(${ch}_threshold).state;'
+          then:
+            - script.execute: ${ch}_water
+
+button:
+  - platform: template
+    name: "${name} - Arroser maintenant"
+    on_press:
+      - script.execute: ${ch}_water

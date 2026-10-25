@@ -4,7 +4,7 @@
 
 Système d'arrosage automatique pour plantes d'intérieur, au design scandinave épuré : formes douces, aspect minéral et céramique, imprimé en 3D (PLA mat, terracotta ou effet marbre).
 
-<!-- ![Vue d'ensemble](docs/images/overview.jpg) -->
+![Vue d'ensemble](docs/images/overview.jpg)
 
 ## Principe
 
